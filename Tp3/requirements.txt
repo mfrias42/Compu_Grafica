@@ -1,0 +1,8 @@
+# Dependencias para el proyecto de Computación Gráfica - TP3
+
+# Librerías instaladas:
+moderngl==5.12.0
+numpy==2.3.2
+pyglet==2.1.8
+glcontext==3.0.0
+
