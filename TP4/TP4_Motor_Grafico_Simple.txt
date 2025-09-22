@@ -1,0 +1,134 @@
+ 
+Trabajo Práctico 4 – Motor Gráfico Básico 
+Objetivo 
+En este trabajo práctico deberán desarrollar un motor gráfico básico que permita crear, mover y renderizar figuras geométricas 3D básicas. 
+La idea es: 
+Crear una ventana con Pyglet. 
+Gestionar OpenGL por medio de ModernGL. 
+Repasar conceptos de OpenGL (VBO, IBO, VAO, shaders, uniforms). 
+Programar una escena 3D con cámara perspective (lookAt + perspective). 
+Entender y construir el pipeline: ventana → contexto → escena → gráficos → shaders. 
+Implementar un motor gráfico base: estructura modular (Window, Scene, Graphics, ShaderProgram, Camera, objetos). 
+Al finalizar, tendrán una ventana con objetos 3D que dibujará los datos cargados en una escena. 
+ 
+Consigna 
+Deben abrir una nueva carpeta con su IDE de preferencia y crear el entorno virtual con el comando ya utilizado: python -m venv .venv 
+Activar el entorno virtual con el comando en Windows:  .venv/Scripts/activate  en macOS/Linux source .venv/bin/activate 
+Instalar las librerías necesarias con el comando:  pip install pyglet moderngl numpy 
+PyGLM 
+Seguir las instrucciones paso a paso para tener el código completo. 
+ 
+Guía paso a paso: 
+CREAR LOS ARCHIVOS. 
+En la carpeta de tu proyecto, crear los siguientes archivos y directorios: 
+Notar: podemos crear los shader con las extensiones .vert y .frag a modo de hacer más legible nuestra estructura de proyecto. 
+ 
+basic_engine/ 
+├─ .venv/ 
+├─ shaders/ 
+│  ├─ basic.vert │  └─ basic.frag 
+├─ src/ 
+│  ├─ main.py 
+│  ├─ window.py 
+│  ├─ scene.py 
+│  ├─ shader_program.py 
+│  ├─ graphics.py 
+│  ├─ camera.py │  └─ cube.py 
+La lógica principal del motor se organiza de la siguiente manera:  
+La ventana es el punto de entrada: inicializa el contexto gráfico y carga una escena. La escena contiene una colección de objetos 3D y una cámara que define el punto de vista. 
+En cada frame, la escena se encarga de renderizar todos los objetos de acuerdo con la posición y orientación de la cámara. 
+La representación gráfica de cada objeto se apoya en dos componentes clave: 
+Graphics: administra los datos del objeto (geometría, vértices, colores, buffers). ShaderProgram: define cómo se procesan esos datos en la GPU (transformaciones, rotaciones, colores, efectos, etc.). 
+En conjunto, este flujo asegura que cada cuadro de la animación se construya correctamente: la ventana gestiona el contexto, la escena organiza los elementos y la cámara, y finalmente los objetos se dibujan en pantalla gracias a la interacción entre Graphics y ShaderProgram. 
+ 
+DESARROLLO DE SHADERS MÍNIMOS: BASIC.VERT Y BASIC.FRAG Crear los shaders mínimos para que el programa funcione: 
+Vertex Shader: inyección de código en el Render Pipeline de la GPU que gestiona vértice por vértice la geometría de un objeto poligonal. Siempre debe configurar el valor gl_Position para que la secuencia no de error. 
+ 
+Fragment Shader: inyección de código en el Render Pipeline de la GPU que gestiona cada píxel generado en la rasterización de un objeto poligonal. Siempre debe devolver un vec4 de color (r,g,b,a) donde alpha es la transparencia del color. 
+ 
+  
+ 
+MAIN.PY  
+main.py: ejecuta el programa. Crea una ventana Window, un ShaderProgram, una Scene, crea las instancias de los objetos gráficos (en este caso Cube), crea la cámara y la posiciona. Por último, agrega los objetos en la escena y corre el loop principal del programa. 
+ 
+ 
+ 
+WINDOW.PY 
+window.py: extiende de la clase Window de Pyglet. Se encarga de gestionar la creación de la ventana y sus eventos. Crea el contexto de ModernGL para trabajar con OpenGL. 
+Implementa el método on_draw que limpia y renderiza la escena en cada frame. También implementa on_resize para escalar el contexto al escalar la ventana (y que no se vea lento) y run para ejecutar el loop principal de Pyglet. 
+
+SHADER_PROGRAM.PY 
+ 
+shader_program.py: se encarga de cargar los shaders vertex y fragment (en este caso) en el Program de ModernGL. Permite también actualizar los valores de los uniforms de los shaders. 
+ 
+GRAPHICS.PY 
+graphics.py: crea el VBO, el IBO y VAO con el ShaderProgram y el format de atributos (en este caso “3f 3f”, “in_pos”, “in_color”). Implementa el método render() para renderizar el VAO en el context, según los valores y funciones indicados en el ShaderProgram. 
+ 
+
+CAMERA.PY 
+camera.py: definición simple de una cámara con su matrix de perspectiva y de view (lookAt). Útil para obtener las coordenadas de la cámara y su proyección (qué es lo que está viendo). 
+ 
+ 
+ 
+CUBE.PY 
+cube.py: definición básica de un cubo. Contiene el array con sus vértices + color e índices para luego crear el VBO y el IBO. Además tiene una matrix del modelo que nos permite aplicar transformaciones al cubo (moverlo, rotarlo, escalarlo). 
+  
+En self.vertices y self.indices reemplazar por (código para copiar y pegar): 
+SCENE.PY 
+scene.py: posiciona una cámara, administra los objetos y sus Graphics (VBO, VAO, ShaderProgram). Realiza transformaciones a los objetos que están en la escena y actualiza sus shaders. También actualiza viewport en on_resize. 
+
+Ejecuta el programa desde main.py y observa el resultado en pantalla. 
+¿Qué notas sobre los cubos? 
+ 
+¿Se dibujan correctamente o parecen estar “invisibles”? 
+ 
+Piensa: el vertex shader que les dimos no trabaja directamente con las coordenadas locales de cada objeto. Antes de que la GPU pueda mostrarlos, es necesario que esas coordenadas sean transformadas teniendo en cuenta tres aspectos fundamentales: 
+La geometría propia del objeto (su sistema de coordenadas locales). 
+ 
+La posición y orientación de la cámara (qué mira y desde dónde). 
+ 
+La proyección de la escena (cómo se proyecta el espacio 3D en la pantalla 2D). 
+ 
+Para unir todo esto, normalmente se construye una única matriz que combina las tres transformaciones: la MVP (Model–View–Projection). Esa matriz debe ser calculada para cada objeto de la escena y enviada al shader en cada frame. 
+Esto convierte la posición de la cámara en el “punto de origen” y la posición del objeto en términos de ese nuevo sistema de coordenadas (trasladando el objeto). 
+Actualmente, en la escena se ejecuta directamente al vao.render(). Eso significa que la geometría llega al shader sin ninguna transformación adicional. El shader, sin embargo, está esperando una matriz Mvp que nunca se actualiza (por lo tanto es una matriz de ceros). 
+Para resolverlo: 
+Cada objeto tiene un método como get_model_matrix() que describe su posición, rotación y escala en la escena. 
+ 
+La cámara ya expone su view matrix y su projection matrix. 
+ 
+Con esas tres piezas se puede armar la matriz final: 
+Mvp = Projection × View × Model 
+ 
+Esa matriz debe enviarse al shader a través del uniform Mvp antes de renderizar cada objeto. 
+Preguntas para guiar la reflexión 
+¿Qué ocurre si no se aplica la matriz de vista de la cámara? 
+¿Y si omitimos la proyección? 
+¿Por qué necesitamos recalcular Mvp para cada objeto y no basta con hacerlo una sola vez?	 
+Ejecuta el programa nuevamente desde main.py y observa atentamente la escena. 
+¿Cómo se ven ahora los cubos? 
+ 
+¿Te parece que la superposición entre ellos es la correcta? 
+ 
+Piensa: cuando dibujamos varios objetos en un espacio 3D, hay que decidir qué superficie queda delante y cuál detrás. La GPU no lo “adivina” automáticamente: depende de un mecanismo que compara profundidades en cada fragmento que se dibuja. 
+Actualmente, ese mecanismo no está activado. El resultado es que algunos polígonos aparecen por encima de otros aunque, según la geometría, deberían estar ocultos. 
+Para resolverlo: 
+En OpenGL existe un buffer de profundidad que guarda, para cada pixel, qué tan lejos está la superficie ya dibujada. 
+ 
+Antes de pintar un nuevo fragmento, la GPU compara su valor de profundidad contra el que ya está almacenado. 
+ 
+Si este chequeo no se realiza, simplemente se pinta todo en el orden de dibujo, sin importar cuál esté realmente adelante. 
+ 
+En ModernGL (y en OpenGL en general), este chequeo debe activarse explícitamente. La 
+instrucción es la siguiente y se debe hacer por cada frame en el que se actualiza la ventana: ctx.enable(moderngl.DEPTH_TEST) 
+ 
+ 
+Entrega 
+Código Python completo y funcionando. 
+Al menos una imagen generada por su programa (un PNG con una escena creada por ustedes) 
+Enviar por email a 2436805@ucc.edu.ar 
+ 
+Bonus (opcional 😏) 
+● Agregar más figuras 3D (por ejemplo, una esfera, un cono). ¿Te animás a crear una sphere.py? Podes usar IA para calcular los vértices e índices. 
+ 
+ 

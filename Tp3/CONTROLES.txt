@@ -1,0 +1,18 @@
+=== MANDALA INTERACTIVO - GUÍA DE CONTROLES ===
+
+Este mandala tiene tres controles interactivos:
+
+🖱️ CLICK DEL MOUSE
+- Cambia la dirección de rotación del mandala
+- Cada click alterna entre rotación horaria y antihoraria
+
+⌨️ BARRA ESPACIADORA
+- Pausa y reanuda la animación
+- Presiona una vez para pausar, presiona otra vez para continuar
+
+🎯 POSICIÓN DEL CURSOR
+- Controla la velocidad de la animación
+- Mientras más lejos esté el cursor del centro, más rápida será la animación
+- La velocidad se mantiene constante según la distancia del cursor al centro
+- Rango de velocidad: desde 0.1x (muy lento) hasta 3.0x (muy rápido)
+

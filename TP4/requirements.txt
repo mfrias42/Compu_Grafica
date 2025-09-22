@@ -1,0 +1,4 @@
+moderngl==5.8.2
+pygame==2.5.2
+PyGLM==2.7.1
+numpy==1.24.3
