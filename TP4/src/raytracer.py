@@ -7,12 +7,12 @@ class RayTracer:
         self.height = height
         self.framebuffer = Texture(width = width, height = height, channels_amount = 3)
 
-        self.camera.set_sky_colors(top=(16,150,222), bottom=(181,224,247)) #gradiente de cielo por default
+        self.camera.set_sky_colors(top=(16, 150, 222), bottom=(181, 224, 247)) #gradiente de cielo por default
 
     def tracer_ray(self, ray, objects):
         for obj in objects:
             if obj.check_hit(ray.origin, ray.direction):
-                return (255,0,0) #rojo
+                return (255, 0, 0) #rojo
         height = ray.direction.y
         return self.camera.get_sky_gradient(height)
     

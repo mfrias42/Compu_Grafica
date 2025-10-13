@@ -1,17 +1,19 @@
 import numpy as np
 
-class Image_Data:
-    def __init__(self, height, width, channels, color = (0, 0, 0)):
-        self.data = np.full((height, width, channels), color, dtype = np.uint8)
-    
+
+class ImageData:
+    def __init__ (self, width, height, channels, color=(0,0,0)):
+       self.data = np.full((height, width, channels), color, dtype=np.uint8)
+
     def set_pixel(self, x, y, color):
         self.data[y, x] = color
-    
+
     def tobytes(self):
         return self.data.tobytes()
 
 class Texture:
-    def __init__(self, name = "u_texture", width = 1, height = 1, channels_amount = 3, image_data:Image_Data = None, color = (0, 0, 0), repeat_x = False, repeat_y = False, build_mipmaps = False):
+    def __init__ (self, name = "u_texture", width=1, height=1, channels_amount=3, image_data:ImageData = None,
+                   colors=(0,0,0), repeat_x = False, repeat_y = False, build_mipmaps = False):
         self.name = name
         self.size = (width, height)
         self.channels_amount = channels_amount
@@ -19,29 +21,24 @@ class Texture:
         self.repeat_y = repeat_y
         self.build_mipmaps = build_mipmaps
 
-        self.width = width
+
+        self.width = width  
         self.height = height
 
         if image_data is not None:
             self._image_data = image_data
         else:
-            self._image_data = Image_Data(height, width, channels_amount, color)
+            self._image_data = ImageData(width, height, channels_amount, colors)
 
-            
-        
     @property
     def image_data(self):
         return self._image_data
-        
-    def update_data(self, new_data:Image_Data):
-        self.image_data = new_data
-        
+    
+    def update_data(self,new_data: ImageData):
+        self._image_data = new_data
+    
     def set_pixel(self, x, y, color):
-            self.image_data.set_pixel(x, y, color)
-
+        self._image_data.set_pixel(x, y, color)
+    
     def get_bytes(self):
-            return self.image_data.tobytes()
-        
-
-
-
+        return self._image_data.tobytes()

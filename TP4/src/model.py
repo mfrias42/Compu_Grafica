@@ -13,6 +13,7 @@ class VertexLayout:
     def get_attribute(self, name: str):
         return next((a for a in self.__attributes if a.name == name), None)
 
+
 class Vertex:
     def __init__(self, name, format, array):
         self.__name = name
@@ -44,4 +45,4 @@ class Model:
         if normals is not None:
             self.vertex_layout.add_attribute("in_normal", "3f", normals)
         if texcoords is not None:
-            self.vertex_layout.add_attribute("in_texcoord", "2f", texcoords)
+            self.vertex_layout.add_attribute("in_uv", "2f", texcoords)
