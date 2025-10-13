@@ -9,6 +9,6 @@ class ShaderProgram:
 
     def set_uniform(self, name, value):
         if name in self.prog:
-            self.prog[name].write(value.tobytes())
+            self.prog[name].write(value.to_bytes())
         else:
             print(f"Warning: Uniform '{name}' not found in shader program.")

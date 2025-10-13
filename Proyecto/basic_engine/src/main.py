@@ -11,7 +11,7 @@ from scene import Scene
 # Ventana
 window = Window(800, 600, "Basic Graphic Engine")
 # Shader
-shader_program = ShaderProgram(window.ctx, '../shaders/basic.vert', '../basic.frag')
+shader_program = ShaderProgram(window.ctx, 'shaders/basic.vert', 'shaders/basic.frag')
 
 # Cámara
 camera = Camera((0, 0, 5), (0, 0, 0), (0, 1, 0), 45, window.width / window.height, 0.1, 100.0)
