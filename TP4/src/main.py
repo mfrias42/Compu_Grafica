@@ -16,7 +16,7 @@ window = Window(800, 600, "Basic Graphic Engine") #una ventana de 800x600
 shader_program = ShaderProgram(window.ctx, '../shaders/basic.vert', '../shaders/basic.frag') #carga los shaders very y frag
 shader_program_skybox = ShaderProgram(window.ctx, '../shaders/sprite.vert', '../shaders/sprite.frag')
 
-skybox_texture = Texture(image_data = np.array([120, 175, 195, 255], dtype = 'u1'))
+skybox_texture = Texture(width = window.width, height = window.height, channels_amount = 3, color = (0, 0, 0)) 
 
 material = Material(shader_program)
 material_sprite = Material(shader_program_skybox, textures_data = [skybox_texture])
