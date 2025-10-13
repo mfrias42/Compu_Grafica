@@ -15,7 +15,6 @@ class Texture:
         self.name = name
         self.size = (width, height)
         self.channels_amount = channels_amount
-        self.image_data = image_data.tobytes() if image_data is not None else None
         self.repeat_x = repeat_x
         self.repeat_y = repeat_y
         self.build_mipmaps = build_mipmaps
