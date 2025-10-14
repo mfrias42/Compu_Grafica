@@ -1,19 +1,4 @@
 from pyclbr import Class
-
-class VertexLayout:
-    def __init__(self):
-        self.__attributes = []
-
-    def add_attribute(self, name: str, format: str, array):
-        self.__attributes.append(Vertex(name, format, array))
-
-    def get_attributes(self):
-        return self.__attributes
-
-    def get_attribute(self, name: str):
-        return next((a for a in self.__attributes if a.name == name), None)
-
-
 class Vertex:
     def __init__(self, name, format, array):
         self.__name = name
@@ -32,7 +17,18 @@ class Vertex:
     def array(self):
         return self.__array
     
+class VertexLayout:
+    def __init__(self):
+        self.__attributes = []
 
+    def add_attribute(self, name: str, format: str, array):
+        self.__attributes.append(Vertex(name, format, array))
+
+    def get_attributes(self):
+        return self.__attributes
+
+    def get_attribute(self, name: str):
+        return next((a for a in self.__attributes if a.name == name), None)
 
 class Model:
     def __init__(self, vertices = None, indices = None, Colors = None, normals = None, texcoords = None):

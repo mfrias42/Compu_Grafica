@@ -34,7 +34,7 @@ class Scene:
 
     def on_mouse_click(self, u, v):
         # Generar un rayo desde la cámara con la posición normalizada del mouse
-        ray = self.camera.raycast(u, v)
+        ray = self.__camera.raycast(u, v)
 
         # Chequear colisiones contra todos los objetos de la escena
         for obj in self.objects:
@@ -50,8 +50,8 @@ class Scene:
 
 
 class RayScene(Scene):
-    def __init__(self, x, camara, width, height):
-        super().__init__(x, camara)
+    def __init__(self,ctx, camara, width, height):
+        super().__init__(ctx, camara)
         self.raytracer = RayTracer(camara, width, height)
 
     def start(self):
