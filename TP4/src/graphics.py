@@ -7,7 +7,7 @@ class Graphics:
         self.__material = material
 
         self.__vbo = self.create_buffers()
-        self.__ibo =ctx.buffer(self.__model.indices.tobytes())
+        self.__ibo = ctx.buffer(self.__model.indices.tobytes())
         self.__vao = ctx.vertex_array(material.shader_program.program, [*self.__vbo,], self.__ibo)
         self.__textures = self.load_textures(material.textures_data)
 
