@@ -41,7 +41,7 @@ class Camera:
 
         view = self.get_view_matrix()
         inv_view = glm.inverse(view)
-        ray_dir_world = glm.vec3(inv_view * glm.vec4(ray_dir_camera, 0.0))
+        ray_dir_world = glm.normalize(glm.vec3(inv_view * glm.vec4(ray_dir_camera, 0.0)))
 
         return Ray(self.position, ray_dir_world)
     

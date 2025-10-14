@@ -1,16 +1,16 @@
 from model import Model
-from hit import HitBoxOBB
+from hit import HitBox
 import numpy as np
 import glm
 
 
 class Cube(Model):
-    def __init__(self, position=(0,0,0), rotation=(0,0,0), scale=(1,1,1), name="cube", hittable = True):
+    def __init__(self, position=(0,0,0), rotation=(0,0,0), scale=(1,1,1), name="cube"):
         self.name = name
         self.position = glm.vec3(*position)
         self.rotation = glm.vec3(*rotation)
         self.scale = glm.vec3(*scale)
-        self.__colision = HitBoxOBB(get_model_matrix = lambda: self.get_model_matrix(), hittable = hittable)
+        self.__colision = HitBox(get_model_matrix = lambda: self.get_model_matrix())
 
 
         vertices = np.array([
