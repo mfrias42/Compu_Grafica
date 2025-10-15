@@ -95,7 +95,7 @@ class RaySceneGPU(Scene):
         self._update_matrix()
         self._matrix_to_ssbo()
     
-    def reder(self):
+    def redner(self):
         self.time += 0.01
         for obj in self.objects:
             if obj.animated:
@@ -104,7 +104,7 @@ class RaySceneGPU(Scene):
             
             if(self.raytracer is not None):
                 self._update_matrix()
-                self._matrix_tossbo()
+                self._matrix_to_ssbo()
                 self.raytracer.run()
 
     def on_resize(self, width, height):
@@ -118,7 +118,7 @@ class RaySceneGPU(Scene):
         for i, (name, graphics) in enumerate(self.graphics.items()):
             graphics.create_primitive(self.primitives)
             graphics.create_transformation_matrix(self.models_f, i)
-            graphics.create_inverse_trasformation_matrix(self.inv_f, i)
+            graphics.create_inverse_transformation_matrix(self.inv_f, i)
             graphics.create_material_matrix(self.mats_f, i)
 
     def _matrix_to_ssbo(self):

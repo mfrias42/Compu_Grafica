@@ -81,7 +81,6 @@ class ComputeGraphics(Graphics):
         m = self.__model.get_model_matrix()
         inverse = glm.inverse(m)
         inverse_transformations_matrix[index, :] = np.array(inverse.to_list(), dtype = "f4").reshape(16)
-        self.mats_f[index, :] = np.array(self.__material.get_material(), dtype = "f4")
 
     def create_material_matrix(self, materials_matrix, index):
         reflectivity = self.__material.reflectivity

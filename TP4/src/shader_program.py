@@ -63,4 +63,4 @@ class ComputeShaderProgram:
                 print(f"Warning: Uniform '{name}' not found in shader program.")
 
         def run(self, groups_x, groups_y, groups_z = 1):
-            self.prog.run(groups_x = groups_x, groups_y = groups_y, groups_z = groups_z)
+            self.prog.run(groups_x, groups_y, groups_z)
