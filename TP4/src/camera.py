@@ -22,10 +22,14 @@ class Camera:
         point = pow(0.5 * (height + 1.0), 1.5)
         return (1.0 - point) * self.__sky_color_bottom + point * self.__sky_color_top
     
-       
-
     def get_perspective_matrix(self):
         return glm.perspective(glm.radians(self.fov), self.aspect, self.near, self.far)   
+
+    def get_view_matrix(self):
+        return glm.lookAT(self.position, self.target, self.up)
+
+    def get_inverse_view_matrix(self):
+        return glm.inverse(self.get_view_matrix())
 
     def get_view_matrix(self):
         return glm.lookAt(self.position, self.target, self.up)

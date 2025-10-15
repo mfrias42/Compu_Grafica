@@ -1,0 +1,112 @@
+#version 430
+
+layout(local_size_x = 16, local_size_y = 16) in;
+layout(rgba32f, binding = 0) uniform image2D outputImage;
+
+layout(std430, binding = 0) buffer Models { mat4 modelMatrices[]; };
+layout(std430, binding = 1) buffer InvModels { mat4 inverseModelMatrices[]; };
+layout(std430, binding = 2) buffer Materials { vec4 materialData[]; };
+layout(std430, binding = 3) buffer BVH { vec4 bvhNodes[]; };
+
+ uniform vec3 cameraPosition;
+ uniform mat4 inverseViewMatrix;
+ uniform float fieldViewMatrix;
+ const float EPS = 1e-4;
+ const int MAX_RAY_BOUNCES = 3;
+ const vec3 LIGHT_DIRECTION = normalize(vec3 (0.5, 1.0, 0.1));
+ const vec3 LIGHT_COLOR  = vec3(1.0, 1.0, 1.0);
+
+ struct RayHit {
+    bool didhit;
+    float distance;
+    vec3 position;
+    vec3 normal;
+    vec3 color;
+    float reflectivity;
+ };
+
+ bool intersectAxisAlignedBox(vec3 rayOrigin, vec3 rayDirection, 
+                            vec3 boxMin, vec3 boxMax, out float timeNear, 
+                            out float timeFar) {
+    vec3 timeAtMinPlane = (boxMin - rayOrigin) / rayDirection;
+    vec3 timeAtMaxPlane = (boxMax - rayOrigin) / rayDirection;
+    vec3 timeMin = min(timeAtMinPlane, timeAtMaxPlane);
+    vec3 timeMax = max(timeAtMinPlane, timeAtMaxPlane);
+    timeNear = max(max(timeMin.x, timeMin.y), timeMin.z);
+    timeFar = min(min(timeMax.x, timeMax.y), timeMax.z);
+    return timeFar >= max(timeNear, 0.0);
+ }
+
+ bool intersectOrientedBox(int objectIndex, vec3 rayOriginWorld, vec3 rayDirectionWorld,
+                          out float hitDistance, out vec3 hitPosition, out vec3 hitNormal) {
+    mat4 inverseTransform = inverseModelMatrices[objectIndex];
+    vec3 rayOriginLocal = (inverseTransform * vec4(rayOriginWorld, 1.0)).xyz;
+    vec3 rayDirectionLocal = normalize((inverseTransform * vec4(rayDirectionWorld, 0.0)).xyz);
+
+
+    float timeNear, timeFar;
+    vec3 boxMinLocal = vec3(-1.0);
+    vec3 boxMaxLocal = vec3(1.0);
+    bool intercects = intersectAxisAlignedBox(rayOriginLocal, rayDirectionLocal, boxMinLocal, boxMaxLocal, timeNear, timeFar);
+   
+    if (!intercects) return false;
+
+
+    float timeLocal = (timeNear > EPS) ? timeNear : timeFar;
+    vec3 hitPositionLocal = rayOriginLocal + rayDirectionLocal * timeLocal;
+
+
+    vec3 distanceToPositiveFaces = abs(hitPositionLocal - vec3(1.0));
+    vec3 distanceToNegativeFaces = abs(hitPositionLocal + vec3(1.0));
+    vec3 minDistance = min(distanceToPositiveFaces, distanceToNegativeFaces);
+    float closestFaceDistance = min(min(minDistance.x, minDistance.y), minDistance.z);
+   
+    vec3 normalLocal = vec3(0.0);
+    if (minDistance.x == closestFaceDistance)
+        normalLocal = vec3(sign(hitPositionLocal.x), 0, 0);
+    else if (minDistance.y == closestFaceDistance)
+        normalLocal = vec3(0, sign(hitPositionLocal.y), 0);
+    else
+        normalLocal = vec3(0, 0, sign(hitPositionLocal.z));
+
+    mat3 normalTransform = transpose(inverse(mat3(modelMatrices[objectIndex])));
+    hitNormal = normalize(normalTransform * normalLocal);
+    hitPosition = (modelMatrices[objectIndex] * vec4(hitPositionLocal, 1.0)).xyz;
+    hitDistance = dot(hitPosition - rayOriginWorld, rayDirectionWorld);
+   
+    return hitDistance > EPS;
+}
+
+ void main() {
+    ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 imageSize = imageSize(outputImage);
+
+    if (pixelCoords.x >= imageSize.x || pixelCoords.y >= imageSize.y)
+    return;
+
+    vec4 color = vec4(1.0, 0.0, 0.0, 1.0);
+
+    float fovAdjustment = tan(radians(fieldOfView) * 0.5);
+    float aspectRatio = float(imageSize.x) / float(imageSize.y):
+
+    vec2 uv = (vec2(pixelCoords) + 0.5 / vec2(imageSize));
+    vec2 ndc = (uv * 2.0 - 1.0) *fovAdjustment;
+    ndc.x *= aspectRatio;
+
+    vec3 rayDirCamera = vec3(ndc.x, ndc.y, -1.0);
+    rayDirCamera = normalize(rayDirCamera);
+
+    float hitdist;
+    vec3 hitPos;
+    ve3 hitNorm;
+
+    vec3 finalColor;
+
+    if(intersectOrientedBox(0, rayOrigin, rayDirection, hitdist, hitPos, hitNorm)) {
+        finalColor = hitNorm;
+    } else {
+        finalColor = vec3(0.0, 0.0, 0.0);
+    }
+
+    imageStore(outputImage, pixelCoords, vec4(finalColor, 1.0));
+ }

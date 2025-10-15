@@ -1,4 +1,9 @@
 from texture import Texture
+from shader_program import ComputeShaderProgram
+from bvh import BVH
+import glm 
+import math
+import numpy as np
 
 class RayTracer:
     def __init__(self, camera, width, height):
@@ -27,3 +32,69 @@ class RayTracer:
 
     def get_texture(self):
         return self.framebuffer.image_data
+
+
+class RayTracerGPU:
+    def __init__(self, ctx, camera, width, height, output_graphics):
+        self.ctx = ctx
+        self.width, self.height = width, height
+        self.camera = camera
+        self.width = width
+        self.height = height
+        self.compute_shader = ComputeShaderProgram(self.ctx, '../shaders/raytracing.comp')
+        self.output_graphics = output_graphics
+
+        self.texture_unit = 0
+        self.output_texture = Texture("u_texture", self.width, self.height, 4, None, (255, 255, 255, 255))
+        self.output_graphics.update_texture("u_texture", self.output_texture.image_data)
+        self.output_graphics.bind_to_image("u_texture", 0, read = False, write = True)
+
+        self.compute_shader.set_uniform('cameraPosition',  self.camera.position)
+        self.compute_shader.set_uniform('inverseViewMatrix', self.camera.get_inverse_view_matrix())
+        self.compute_shader.set_uniform('fieldOfView', self.camera.fov)
+
+       
+    def resize(self, width, height):
+        self.width, self.height = width, height
+        self.output_texture = Texture("u_texture", width, height, 4, None, (255, 255, 255, 255))
+        self.output_graphics.update_texture("u_texture", self.output_texture.image_data)
+
+    def start(self):
+        print("start raytracing GPU!")
+        self.primitives = []
+        n = len(self.objects)
+        self.models_f = np.zeros((n,16), dtype = 'f4')
+        self.inv_f = np.zeros((n,16), dtype = 'f4')
+        self.mats_f = np.zeros((n,4), dtype = 'f4')
+
+        self._update_matrix()
+        self._matrix_to_ssbo()
+    
+    def reder(self):
+        self.time += 0.01
+        for obj in self.objects:
+            if obj.animated:
+                obj.rotation += glm.vec3(0.8,0.6,0.4)
+                obj.position.x += math.sin(self.time)* 0.01
+
+        if (self.raytracer is not None):
+            self._update_matrix()
+            self._matrix_to_ssbo()
+
+    def matrix_to_ssbo(self, matrix, binding = 0):
+        buffer = self.ctx.buffer(matrix.tobytes());
+        buffer.bind_to_storage_buffer(binding = binding)
+    
+    def primitives_to_ssbo(self, primitives, binding = 3):
+        self.bvh_nodes = BVH(primitives)
+        self.bvh_ssbo = self.bvh_nodes.pack_to_bytes()
+        buf_bvh = self.ctx.buffer(self.bvh_ssbo);
+
+    def run(self):
+        groups_x = (self.width + 15) // 16
+        groups_y = (self.height + 15) // 16
+
+        self.compute_shader.run(groups_x = groups_x, groups_y = groups_y, groups_z = 1)
+        self.ctx.clear(0.0, 0.0, 0.0, 1.0)
+        self.output_graphics.render({"u_texture": self.texture_unit})
+
