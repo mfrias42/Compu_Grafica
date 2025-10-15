@@ -95,7 +95,7 @@ class RaySceneGPU(Scene):
         self._update_matrix()
         self._matrix_to_ssbo()
     
-    def redner(self):
+    def render(self):
         self.time += 0.01
         for obj in self.objects:
             if obj.animated:

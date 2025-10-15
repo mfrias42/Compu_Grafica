@@ -59,28 +59,6 @@ class RayTracerGPU:
         self.output_texture = Texture("u_texture", width, height, 4, None, (255, 255, 255, 255))
         self.output_graphics.update_texture("u_texture", self.output_texture.image_data)
 
-    def start(self):
-        print("start raytracing GPU!")
-        self.primitives = []
-        n = len(self.objects)
-        self.models_f = np.zeros((n,16), dtype = 'f4')
-        self.inv_f = np.zeros((n,16), dtype = 'f4')
-        self.mats_f = np.zeros((n,4), dtype = 'f4')
-
-        self._update_matrix()
-        self._matrix_to_ssbo()
-    
-    def reder(self):
-        self.time += 0.01
-        for obj in self.objects:
-            if obj.animated:
-                obj.rotation += glm.vec3(0.8,0.6,0.4)
-                obj.position.x += math.sin(self.time)* 0.01
-
-        if (self.raytracer is not None):
-            self._update_matrix()
-            self._matrix_to_ssbo()
-
     def matrix_to_ssbo(self, matrix, binding = 0):
         buffer = self.ctx.buffer(matrix.tobytes());
         buffer.bind_to_storage_buffer(binding = binding)
@@ -88,7 +66,8 @@ class RayTracerGPU:
     def primitives_to_ssbo(self, primitives, binding = 3):
         self.bvh_nodes = BVH(primitives)
         self.bvh_ssbo = self.bvh_nodes.pack_to_bytes()
-        buf_bvh = self.ctx.buffer(self.bvh_ssbo);
+        buf_bvh = self.ctx.buffer(self.bvh_ssbo)
+        buf_bvh.bind_to_storage_buffer(binding = binding)
 
     def run(self):
         groups_x = (self.width + 15) // 16
