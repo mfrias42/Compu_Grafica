@@ -1,0 +1,12 @@
+# Dependencias para el proyecto de computación gráfica
+# Motor gráfico OpenGL moderno
+moderngl>=5.8.0
+
+# Biblioteca para crear ventanas y manejar eventos
+pyglet>=2.0.0
+
+# Biblioteca para operaciones matemáticas y arrays
+numpy>=1.24.0
+
+# Biblioteca para matemáticas de gráficos 3D (matrices, vectores, etc.)
+PyGLM>=2.7.0
